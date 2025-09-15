@@ -107,13 +107,12 @@ options = vision.PoseLandmarkerOptions(
     base_options=base_options,
     running_mode=VisionRunningMode.LIVE_STREAM,
     result_callback=draw_landmarks_on_image,
-    delegate=mp.tasks.BaseOptions.Delegate.GPU,
     min_tracking_confidence=0.7, # 0.7
     min_pose_detection_confidence=0.7, # 0.7
     min_pose_presence_confidence=0.6) # 0.6
 detector = vision.PoseLandmarker.create_from_options(options)
 
-cap = cv2.VideoCapture("walking_assets/Walking_Harder.mp4")
+cap = cv2.VideoCapture("walking_assets/Walking.mp4")
 
 while cap.isOpened():
   ret, frame = cap.read()

@@ -15,8 +15,7 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 pose_frame = None
 pose_result = None
 
-prev_pose_result = None
-delayed_update_counter = 0
+prev_pose_result = []
 
 prevResult = [True, True]
 
@@ -112,7 +111,7 @@ options = vision.PoseLandmarkerOptions(
     min_pose_presence_confidence=0.6) # 0.6
 detector = vision.PoseLandmarker.create_from_options(options)
 
-cap = cv2.VideoCapture("walking_assets/Walking.mp4")
+cap = cv2.VideoCapture("walking_assets/walking.mp4")
 
 while cap.isOpened():
   ret, frame = cap.read()
@@ -131,17 +130,15 @@ while cap.isOpened():
     converted_frame = cv2.cvtColor(pose_frame, cv2.COLOR_RGB2BGR)
 
     if pose_result is not None:
-      if (prev_pose_result is None):
-        prev_pose_result = pose_result
-
       result = stepDetected(pose_result)
+      prev_pose_result.append(pose_result)
 
-      if (not(leftLeg) and result[0] and not(prevResult[0]) and initiallyLeftForward(prev_pose_result)):
+      if (not(leftLeg) and result[0] and not(prevResult[0]) and initiallyLeftForward(prev_pose_result[0])):
         stepNum+=1
         leftLeg = True
         rightLeg = False
         currentLeg = "Left Leg"
-      if (not(rightLeg) and result[1] and not(prevResult[1]) and initiallyRightForward(prev_pose_result)):
+      if (not(rightLeg) and result[1] and not(prevResult[1]) and initiallyRightForward(prev_pose_result[0])):
         stepNum+=1
         rightLeg = True
         leftLeg = False
@@ -149,11 +146,9 @@ while cap.isOpened():
       
       prevResult = result
 
-      delayed_update_counter+=1
-      if (delayed_update_counter >= 5): # 5 for walking
-        prev_pose_result = pose_result
-        delayed_update_counter = 0
-
+      if (len(prev_pose_result) >= 5): # 5 for walking
+        del prev_pose_result[0]
+    
     converted_frame = cv2.putText(converted_frame, currentLeg, (200, 50), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
     converted_frame = cv2.putText(converted_frame, "Step Count: " + str(stepNum), (500, 50), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
 
